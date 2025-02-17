@@ -6,6 +6,7 @@ import {
   ImageBackground,
   useWindowDimensions,
   StyleSheet,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
@@ -14,7 +15,8 @@ export default function WelcomeScreen() {
   const { width, height } = useWindowDimensions();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <StatusBar barStyle="dark-content" backgroundColor="white" />
       <View style={[styles.textContainer, { top: height * 0.2 }]}>
         <Text className="text-4xl text-gray-700 font-extrabold">Welcome</Text>
         <Text className="text-xl text-gray-500 text-center font-semibold px-10">
@@ -38,7 +40,7 @@ export default function WelcomeScreen() {
       />
 
       <View style={[styles.buttonContainer, { bottom: height * 0.05 }]}>
-        <Link href="/login">
+        <Link href="/(auth)/signin" asChild>
           <Pressable className="bg-white px-10 py-3 rounded-lg">
             <Text className="text-gray-600 text-center font-semibold">
               GET STARTED
