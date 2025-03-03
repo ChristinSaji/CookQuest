@@ -75,7 +75,10 @@ export default function SignInScreen() {
               />
             </View>
 
-            <Pressable style={styles.forgotContainer}>
+            <Pressable
+              style={styles.forgotContainer}
+              onPress={() => router.push("/(auth)/forget-password")}
+            >
               <Text style={styles.forgotText}>Forgot password?</Text>
             </Pressable>
 
