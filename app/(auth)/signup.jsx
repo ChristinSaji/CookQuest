@@ -11,11 +11,11 @@ import {
   Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BackgroundSvg from "../../assets/svgs/bg-signin.svg";
+import BackgroundSvg from "../../assets/svgs/bg-signup.svg";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-export default function SignInScreen() {
+export default function SignUpScreen() {
   const { width, height } = Dimensions.get("window");
   const router = useRouter();
 
@@ -41,10 +41,24 @@ export default function SignInScreen() {
           </Pressable>
 
           <View style={styles.textContainer}>
-            <Text style={styles.welcomeText}>Welcome{"\n"}Back</Text>
+            <Text style={styles.welcomeText}>Create{"\n"}Account</Text>
           </View>
 
           <View style={styles.inputContainer}>
+            <View style={styles.inputWrapper}>
+              <Ionicons
+                name="person-outline"
+                size={20}
+                color="gray"
+                style={styles.icon}
+              />
+              <TextInput
+                placeholder="Name"
+                placeholderTextColor="gray"
+                style={styles.input}
+              />
+            </View>
+
             <View style={styles.inputWrapper}>
               <Ionicons
                 name="mail-outline"
@@ -75,12 +89,8 @@ export default function SignInScreen() {
               />
             </View>
 
-            <Pressable style={styles.forgotContainer}>
-              <Text style={styles.forgotText}>Forgot password?</Text>
-            </Pressable>
-
-            <Pressable style={styles.signInButton}>
-              <Text style={styles.signInText}>Sign In</Text>
+            <Pressable style={styles.signUpButton}>
+              <Text style={styles.signUpText}>Sign Up</Text>
             </Pressable>
 
             <View style={styles.orContainer}>
@@ -90,10 +100,10 @@ export default function SignInScreen() {
             </View>
 
             <Pressable
-              style={styles.signUpButton}
-              onPress={() => router.push("/(auth)/signup")}
+              style={styles.signInButton}
+              onPress={() => router.push("/(auth)/signin")}
             >
-              <Text style={styles.signUpText}>Sign up</Text>
+              <Text style={styles.signInText}>Sign In</Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -136,7 +146,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   inputContainer: {
-    marginTop: "80%",
+    marginTop: "75%",
     width: "85%",
     alignSelf: "center",
   },
@@ -159,22 +169,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "black",
   },
-  forgotContainer: {
-    alignSelf: "flex-end",
-    marginBottom: 14,
-  },
-  forgotText: {
-    fontSize: 14,
-    color: "#A1B75A",
-  },
-  signInButton: {
+  signUpButton: {
     backgroundColor: "#A1B75A",
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",
     marginTop: 5,
   },
-  signInText: {
+  signUpText: {
     fontSize: 18,
     color: "white",
     fontWeight: "bold",
@@ -195,14 +197,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "gray",
   },
-  signUpButton: {
+  signInButton: {
     borderWidth: 1,
     borderColor: "#A1B75A",
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",
   },
-  signUpText: {
+  signInText: {
     fontSize: 18,
     color: "#A1B75A",
   },
