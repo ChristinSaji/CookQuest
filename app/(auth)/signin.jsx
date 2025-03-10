@@ -82,7 +82,10 @@ export default function SignInScreen() {
               <Text style={styles.forgotText}>Forgot password?</Text>
             </Pressable>
 
-            <Pressable style={styles.signInButton}>
+            <Pressable
+              style={styles.signInButton}
+              onPress={() => router.push("/(main)/recipes")}
+            >
               <Text style={styles.signInText}>Sign In</Text>
             </Pressable>
 

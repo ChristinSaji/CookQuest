@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
 
-export default function DashboardScreen() {
+export default function RecipesScreen() {
   const [open, setOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Breakfast");
 

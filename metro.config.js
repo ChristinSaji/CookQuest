@@ -5,6 +5,9 @@ module.exports = withNativeWind(
   (() => {
     const config = getDefaultConfig(__dirname);
 
+    config.transformer = config.transformer || {};
+    config.resolver = config.resolver || {};
+
     config.transformer.babelTransformerPath = require.resolve(
       "react-native-svg-transformer"
     );
