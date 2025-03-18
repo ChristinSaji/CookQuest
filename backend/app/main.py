@@ -1,17 +1,10 @@
 from fastapi import FastAPI
-from pymongo import MongoClient
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-MONGO_URI = os.getenv("MONGO_URI")
-
-client = MongoClient(MONGO_URI)
-db = client["cookquest"]
+from app.routes import users
 
 app = FastAPI()
 
+app.include_router(users.router, prefix="/auth", tags=["Authentication"])
+
 @app.get("/")
-def read_root():
-    return {"message": "Welcome to CookQuest API!"}
+def home():
+    return {"message": "Welcome to CookQuest Backend!"}
