@@ -1,0 +1,30 @@
+# Python-related ignores
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+
+# Virtual Environment (venv)
+venv/
+.env
+.env.local
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# OS-Specific Files
+.DS_Store
+Thumbs.db
+
+# Logs & Debugging Files
+logs/
+*.log
+
+# FastAPI & Uvicorn Cache
+instance/
+*.sqlite3
