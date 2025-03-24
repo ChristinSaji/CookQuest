@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,15 +7,43 @@ import {
   StyleSheet,
   StatusBar,
   Dimensions,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackgroundSvg from "../../assets/svgs/bg-reset.svg";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { resetPassword } from "../../utils/api";
 
 export default function ResetPasswordScreen() {
   const { width, height } = Dimensions.get("window");
   const router = useRouter();
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [token, setToken] = useState(""); // Paste token from email
+
+  const handleReset = async () => {
+    if (!newPassword || !confirmPassword || !token) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+
+    try {
+      const response = await resetPassword(token, newPassword);
+      Alert.alert("Success", "Password reset successful!", [
+        { text: "OK", onPress: () => router.push("/(auth)/signin") },
+      ]);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Reset Failed", err.message);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -33,15 +62,31 @@ export default function ResetPasswordScreen() {
       </Pressable>
 
       <View style={styles.textContainer}>
-        <Text className="text-white text-4xl font-semibold">
+        <Text style={{ color: "white", fontSize: 36, fontWeight: "bold" }}>
           Reset Password
         </Text>
-        <Text className="text-white text-lg mt-2">
+        <Text style={{ color: "white", fontSize: 16, marginTop: 6 }}>
           Enter your new password below
         </Text>
       </View>
 
       <View style={styles.inputContainer}>
+        <View style={styles.inputWrapper}>
+          <Ionicons
+            name="key-outline"
+            size={20}
+            color="gray"
+            style={styles.icon}
+          />
+          <TextInput
+            placeholder="Reset Token"
+            placeholderTextColor="gray"
+            style={styles.input}
+            value={token}
+            onChangeText={setToken}
+          />
+        </View>
+
         <View style={styles.inputWrapper}>
           <Ionicons
             name="lock-closed-outline"
@@ -54,6 +99,8 @@ export default function ResetPasswordScreen() {
             placeholderTextColor="gray"
             style={styles.input}
             secureTextEntry
+            value={newPassword}
+            onChangeText={setNewPassword}
           />
         </View>
 
@@ -69,13 +116,12 @@ export default function ResetPasswordScreen() {
             placeholderTextColor="gray"
             style={styles.input}
             secureTextEntry
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
           />
         </View>
 
-        <Pressable
-          style={styles.resetButton}
-          onPress={() => router.push("/(auth)/signin")}
-        >
+        <Pressable style={styles.resetButton} onPress={handleReset}>
           <Text style={styles.resetButtonText}>Reset Password</Text>
         </Pressable>
       </View>

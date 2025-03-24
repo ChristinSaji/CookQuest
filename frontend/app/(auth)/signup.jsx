@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,15 +10,31 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackgroundSvg from "../../assets/svgs/bg-signup.svg";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { signupUser } from "../../utils/api";
 
 export default function SignUpScreen() {
   const { width, height } = Dimensions.get("window");
   const router = useRouter();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSignup = async () => {
+    try {
+      const user = await signupUser({ name, email, password });
+      Alert.alert("Success", "Account created successfully");
+      router.push("/(auth)/signin");
+    } catch (err) {
+      Alert.alert("Error", err.message);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -56,6 +73,8 @@ export default function SignUpScreen() {
                 placeholder="Name"
                 placeholderTextColor="gray"
                 style={styles.input}
+                value={name}
+                onChangeText={setName}
               />
             </View>
 
@@ -71,6 +90,8 @@ export default function SignUpScreen() {
                 placeholderTextColor="gray"
                 style={styles.input}
                 keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
               />
             </View>
 
@@ -86,10 +107,12 @@ export default function SignUpScreen() {
                 placeholderTextColor="gray"
                 style={styles.input}
                 secureTextEntry
+                value={password}
+                onChangeText={setPassword}
               />
             </View>
 
-            <Pressable style={styles.signUpButton}>
+            <Pressable style={styles.signUpButton} onPress={handleSignup}>
               <Text style={styles.signUpText}>Sign Up</Text>
             </Pressable>
 

@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,15 +7,33 @@ import {
   StyleSheet,
   StatusBar,
   Dimensions,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackgroundSvg from "../../assets/svgs/bg-forget.svg";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { forgotPassword } from "../../utils/api";
 
 export default function ForgotPasswordScreen() {
   const { width, height } = Dimensions.get("window");
   const router = useRouter();
+  const [email, setEmail] = useState("");
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      Alert.alert("Missing Email", "Please enter your email.");
+      return;
+    }
+
+    try {
+      await forgotPassword(email);
+      Alert.alert("Email Sent", "Check your email for the reset link.");
+      router.push("/(auth)/reset-password");
+    } catch (error) {
+      Alert.alert("Error", error.message || "Something went wrong.");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -54,13 +73,13 @@ export default function ForgotPasswordScreen() {
             placeholderTextColor="gray"
             style={styles.input}
             keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
           />
         </View>
 
-        <Pressable
-          style={styles.sendButton}
-          onPress={() => router.push("/(auth)/reset-password")}
-        >
+        <Pressable style={styles.sendButton} onPress={handleForgotPassword}>
           <Text style={styles.sendButtonText}>Send Reset Link</Text>
         </Pressable>
       </View>

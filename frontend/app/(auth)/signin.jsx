@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,15 +10,37 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackgroundSvg from "../../assets/svgs/bg-signin.svg";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { loginUser } from "../../utils/api";
 
 export default function SignInScreen() {
   const { width, height } = Dimensions.get("window");
   const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter both email and password");
+      return;
+    }
+
+    try {
+      const data = await loginUser({ email, password });
+      console.log("Login success:", data);
+
+      router.push("/(main)/recipes");
+    } catch (error) {
+      console.error("Login error:", error.message);
+      Alert.alert("Login Failed", error.message);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -57,6 +80,8 @@ export default function SignInScreen() {
                 placeholderTextColor="gray"
                 style={styles.input}
                 keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
               />
             </View>
 
@@ -72,6 +97,8 @@ export default function SignInScreen() {
                 placeholderTextColor="gray"
                 style={styles.input}
                 secureTextEntry
+                value={password}
+                onChangeText={setPassword}
               />
             </View>
 
@@ -82,10 +109,7 @@ export default function SignInScreen() {
               <Text style={styles.forgotText}>Forgot password?</Text>
             </Pressable>
 
-            <Pressable
-              style={styles.signInButton}
-              onPress={() => router.push("/(main)/recipes")}
-            >
+            <Pressable style={styles.signInButton} onPress={handleSignIn}>
               <Text style={styles.signInText}>Sign In</Text>
             </Pressable>
 
