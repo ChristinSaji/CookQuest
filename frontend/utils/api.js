@@ -70,3 +70,18 @@ export async function resetPassword(token, new_password) {
 
   return data;
 }
+
+export async function getRecipes(category = "Breakfast") {
+  try {
+    const response = await fetch(`${BASE_URL}/recipes?category=${category}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.detail || "Failed to fetch recipes");
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}

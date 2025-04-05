@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,14 +9,18 @@ import {
   FlatList,
   StatusBar,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
+import { getRecipes } from "../../utils/api";
 
 export default function RecipesScreen() {
   const [open, setOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Breakfast");
+  const [meals, setMeals] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const categories = [
     { label: "Breakfast", value: "Breakfast" },
@@ -25,50 +29,21 @@ export default function RecipesScreen() {
     { label: "Supper", value: "Supper" },
   ];
 
-  const meals = [
-    {
-      id: "1",
-      name: "Meal 1",
-      image: require("../../assets/images/meal1.png"),
-      rating: 4,
-      bgColor: "#C9BBC7",
-    },
-    {
-      id: "2",
-      name: "Meal 2",
-      image: require("../../assets/images/meal2.png"),
-      rating: 3,
-      bgColor: "#BDCB90",
-    },
-    {
-      id: "3",
-      name: "Fresh Fruit Salad",
-      image: require("../../assets/images/meal3.png"),
-      rating: 5,
-      bgColor: "#D7E0E6",
-    },
-    {
-      id: "4",
-      name: "Caesar’s Salad",
-      image: require("../../assets/images/meal4.png"),
-      rating: 4,
-      bgColor: "#F8DF9F",
-    },
-    {
-      id: "5",
-      name: "Vegan Delight",
-      image: require("../../assets/images/meal5.png"),
-      rating: 5,
-      bgColor: "#FFE459",
-    },
-    {
-      id: "6",
-      name: "Protein Bowl",
-      image: require("../../assets/images/meal6.png"),
-      rating: 4,
-      bgColor: "#B1F89F",
-    },
-  ];
+  useEffect(() => {
+    fetchRecipes();
+  }, [selectedCategory]);
+
+  const fetchRecipes = async () => {
+    setLoading(true);
+    try {
+      const data = await getRecipes(selectedCategory);
+      setMeals(data);
+    } catch (error) {
+      console.error("Failed to fetch recipes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -79,42 +54,41 @@ export default function RecipesScreen() {
         className="flex-1"
         resizeMode="cover"
       >
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: 100 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="flex-row items-center justify-between px-4 py-5">
-            <Pressable className="p-2">
-              <Ionicons name="menu" size={28} color="black" />
-            </Pressable>
-            <Image
-              source={require("../../assets/images/profile-pic.png")}
-              className="w-10 h-10 rounded-full"
-            />
-          </View>
+        <View className="flex-row items-center justify-between px-4 py-5">
+          <Pressable className="p-2">
+            <Ionicons name="menu" size={28} color="black" />
+          </Pressable>
+          <Image
+            source={require("../../assets/images/profile-pic.png")}
+            className="w-10 h-10 rounded-full"
+          />
+        </View>
 
-          <View className="px-6 mt-8">
-            <Text className="text-4xl font-bold text-black">Recipes</Text>
-            <Text className="text-lg text-gray-500">
-              The perfect healthy food
-            </Text>
-          </View>
+        <View className="px-6 mt-8">
+          <Text className="text-4xl font-bold text-black">Recipes</Text>
+          <Text className="text-lg text-gray-500">
+            The perfect healthy food
+          </Text>
+        </View>
 
-          <View className="px-6 mt-6 z-50">
-            <DropDownPicker
-              open={open}
-              value={selectedCategory}
-              items={categories}
-              setOpen={setOpen}
-              setValue={setSelectedCategory}
-              placeholder="Select Category"
-              style={styles.dropdown}
-              textStyle={styles.dropdownText}
-              dropDownContainerStyle={styles.dropdownContainer}
-            />
-          </View>
+        <View className="px-6 mt-6 z-50">
+          <DropDownPicker
+            open={open}
+            value={selectedCategory}
+            items={categories}
+            setOpen={setOpen}
+            setValue={setSelectedCategory}
+            placeholder="Select Category"
+            style={styles.dropdown}
+            textStyle={styles.dropdownText}
+            dropDownContainerStyle={styles.dropdownContainer}
+          />
+        </View>
 
-          <View className="px-6 mt-16">
+        <View className="px-6 mt-16">
+          {loading ? (
+            <ActivityIndicator size="large" color="#A1B75A" />
+          ) : (
             <FlatList
               data={meals}
               keyExtractor={(item) => item.id}
@@ -124,17 +98,20 @@ export default function RecipesScreen() {
               nestedScrollEnabled={true}
               keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
-                <View style={[styles.card, { backgroundColor: item.bgColor }]}>
+                <View
+                  style={[
+                    styles.card,
+                    { backgroundColor: item.bgColor || "#FFF" },
+                  ]}
+                >
                   <Image
-                    source={item.image}
+                    source={{ uri: `http://192.168.2.154:8000${item.image}` }}
                     className="w-full h-36"
                     resizeMode="contain"
                   />
-
                   <Text className="text-sm font-semibold text-black mt-2">
                     {item.name}
                   </Text>
-
                   <View className="flex-row mt-1">
                     {[...Array(5)].map((_, index) => (
                       <FontAwesome
@@ -145,15 +122,14 @@ export default function RecipesScreen() {
                       />
                     ))}
                   </View>
-
                   <Pressable style={styles.hideButton}>
                     <Text className="text-white text-xs">Hide</Text>
                   </Pressable>
                 </View>
               )}
             />
-          </View>
-        </ScrollView>
+          )}
+        </View>
       </ImageBackground>
     </SafeAreaView>
   );
