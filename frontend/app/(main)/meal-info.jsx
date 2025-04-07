@@ -192,7 +192,10 @@ export default function MealInfoScreen() {
           />
         </Pressable>
 
-        <Pressable style={styles.startCookingButton}>
+        <Pressable
+          style={styles.startCookingButton}
+          onPress={() => router.push("/(main)/cooking")}
+        >
           <Text style={styles.startCookingText}>Start Cooking</Text>
         </Pressable>
       </View>
