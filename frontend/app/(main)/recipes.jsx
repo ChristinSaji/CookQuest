@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -17,6 +18,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { getRecipes } from "../../utils/api";
 
 export default function RecipesScreen() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Breakfast");
   const [meals, setMeals] = useState([]);
@@ -98,7 +100,8 @@ export default function RecipesScreen() {
               nestedScrollEnabled={true}
               keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
-                <View
+                <Pressable
+                  onPress={() => router.push("/(main)/meal-info")}
                   style={[
                     styles.card,
                     { backgroundColor: item.bgColor || "#FFF" },
@@ -125,7 +128,7 @@ export default function RecipesScreen() {
                   <Pressable style={styles.hideButton}>
                     <Text className="text-white text-xs">Hide</Text>
                   </Pressable>
-                </View>
+                </Pressable>
               )}
             />
           )}

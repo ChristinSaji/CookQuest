@@ -3,6 +3,7 @@ import {
   Text,
   Pressable,
   StyleSheet,
+  StatusBar,
   Dimensions,
   Image,
   FlatList,
@@ -62,6 +63,7 @@ export default function MealInfoScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#A1B75A" />
       <View style={styles.svgContainer}>
         <BackgroundSvg
           width="100%"
