@@ -60,10 +60,12 @@ export default function RecipesScreen() {
           <Pressable className="p-2">
             <Ionicons name="menu" size={28} color="black" />
           </Pressable>
-          <Image
-            source={require("../../assets/images/profile-pic.png")}
-            className="w-10 h-10 rounded-full"
-          />
+          <Pressable onPress={() => router.push("/(onboarding)/userinfo")}>
+            <Image
+              source={require("../../assets/images/profile-pic.png")}
+              className="w-10 h-10 rounded-full"
+            />
+          </Pressable>
         </View>
 
         <View className="px-6 mt-8">
