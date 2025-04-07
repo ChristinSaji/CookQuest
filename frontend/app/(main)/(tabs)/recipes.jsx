@@ -6,7 +6,6 @@ import {
   Image,
   Pressable,
   ImageBackground,
-  ScrollView,
   FlatList,
   StatusBar,
   StyleSheet,
@@ -15,7 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
-import { getRecipes } from "../../utils/api";
+import { getRecipes } from "../../../utils/api";
 
 export default function RecipesScreen() {
   const router = useRouter();
@@ -52,7 +51,7 @@ export default function RecipesScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="white" />
 
       <ImageBackground
-        source={require("../../assets/images/bg-main.png")}
+        source={require("../../../assets/images/bg-main.png")}
         className="flex-1"
         resizeMode="cover"
       >
@@ -62,7 +61,7 @@ export default function RecipesScreen() {
           </Pressable>
           <Pressable onPress={() => router.push("/(onboarding)/userinfo")}>
             <Image
-              source={require("../../assets/images/profile-pic.png")}
+              source={require("../../../assets/images/profile-pic.png")}
               className="w-10 h-10 rounded-full"
             />
           </Pressable>

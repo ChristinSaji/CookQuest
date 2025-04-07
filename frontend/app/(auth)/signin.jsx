@@ -35,7 +35,7 @@ export default function SignInScreen() {
       const data = await loginUser({ email, password });
       console.log("Login success:", data);
 
-      router.push("/(main)/recipes");
+      router.push("/(main)/(tabs)/recipes");
     } catch (error) {
       console.error("Login error:", error.message);
       Alert.alert("Login Failed", error.message);
