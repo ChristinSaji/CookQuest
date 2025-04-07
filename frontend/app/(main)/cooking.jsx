@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Camera, CameraType } from "expo-camera";
+import { Camera } from "expo-camera";
 
 const { width, height } = Dimensions.get("window");
 
@@ -36,17 +36,21 @@ export default function CookingScreen() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const step = steps[currentStep];
-  const [permission, requestPermission] = useState(null);
+  const [hasPermission, setHasPermission] = useState(null);
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
-      requestPermission(status === "granted");
+      setHasPermission(status === "granted");
     })();
   }, []);
 
-  const openCamera = async () => {
-    alert("Camera will open here to take a picture 📸");
+  const openCamera = () => {
+    if (hasPermission) {
+      router.push("/(main)/camera-capture");
+    } else {
+      alert("Camera permission not granted");
+    }
   };
 
   return (
