@@ -47,7 +47,7 @@ export default function CookingScreen() {
 
   const openCamera = () => {
     if (hasPermission) {
-      router.push("/(main)/camera-capture");
+      router.push(`/camera?stepIndex=${currentStep}`);
     } else {
       alert("Camera permission not granted");
     }
