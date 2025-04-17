@@ -40,7 +40,37 @@ export default function CameraScreen() {
   };
 
   const uploadPhoto = async () => {
-    router.back();
+    if (!photo || !photo.uri) return;
+
+    const formData = new FormData();
+    formData.append("file", {
+      uri: photo.uri,
+      name: `step_${stepIndex}.jpg`,
+      type: "image/jpeg",
+    });
+    formData.append("step_index", stepIndex || "0");
+
+    try {
+      const res = await fetch("http://192.168.2.154:8000/validate-step/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+
+      const result = await res.json();
+      console.log("Upload response:", result);
+
+      if (result.success) {
+        router.back();
+      } else {
+        alert("Step validation failed.");
+      }
+    } catch (err) {
+      console.error("Error uploading photo:", err);
+      alert("Failed to upload photo.");
+    }
   };
 
   return photo ? (
