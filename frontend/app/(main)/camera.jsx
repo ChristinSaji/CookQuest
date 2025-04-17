@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Text,
+  Dimensions,
 } from "react-native";
 import Slider from "@react-native-community/slider";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -14,11 +15,16 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
+import { validateStep } from "../../utils/api";
+
+const { width, height } = Dimensions.get("window");
 
 export default function CameraScreen() {
   const [cameraPermission, setCameraPermission] = useState();
   const [photo, setPhoto] = useState(null);
   const [zoom, setZoom] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const cameraRef = useRef(null);
   const router = useRouter();
   const { stepIndex } = useLocalSearchParams();
@@ -40,36 +46,21 @@ export default function CameraScreen() {
   };
 
   const uploadPhoto = async () => {
-    if (!photo || !photo.uri) return;
-
-    const formData = new FormData();
-    formData.append("file", {
-      uri: photo.uri,
-      name: `step_${stepIndex}.jpg`,
-      type: "image/jpeg",
-    });
-    formData.append("step_index", stepIndex || "0");
+    if (!photo?.uri) return;
 
     try {
-      const res = await fetch("http://192.168.2.154:8000/validate-step/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        body: formData,
+      const result = await validateStep({
+        photoUri: photo.uri,
+        stepIndex,
       });
 
-      const result = await res.json();
-      console.log("Upload response:", result);
-
-      if (result.success) {
-        router.back();
-      } else {
-        alert("Step validation failed.");
-      }
+      setShowSuccess(true);
+      setTimeout(() => {
+        const nextStep = parseInt(stepIndex) + 1;
+        router.replace(`/cooking?stepIndex=${nextStep}`);
+      }, 1000);
     } catch (err) {
-      console.error("Error uploading photo:", err);
-      alert("Failed to upload photo.");
+      alert("Failed to upload photo. Please try again.");
     }
   };
 
@@ -86,6 +77,13 @@ export default function CameraScreen() {
           <Text style={styles.label}>Upload</Text>
         </TouchableOpacity>
       </View>
+
+      {showSuccess && (
+        <View style={styles.successOverlay}>
+          <FontAwesome name="check-circle" size={60} color="#4CAF50" />
+          <Text style={styles.successText}>Step Completed!</Text>
+        </View>
+      )}
     </SafeAreaView>
   ) : (
     <View style={styles.container}>
@@ -150,5 +148,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     color: "#333",
+  },
+  successOverlay: {
+    position: "absolute",
+    top: height / 2.5,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    padding: 30,
+    borderRadius: 20,
+    marginHorizontal: 20,
+    elevation: 5,
+  },
+  successText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 10,
+    color: "#4CAF50",
   },
 });

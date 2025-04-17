@@ -85,3 +85,39 @@ export async function getRecipes(category = "Breakfast") {
     throw error;
   }
 }
+
+export async function validateStep({ photoUri, stepIndex, maxAttempts = 3 }) {
+  const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+
+  const formData = new FormData();
+  formData.append("file", {
+    uri: photoUri.startsWith("file://") ? photoUri : `file://${photoUri}`,
+    name: `step_${stepIndex}.jpg`,
+    type: "image/jpeg",
+  });
+  formData.append("step_index", stepIndex || "0");
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await wait(200);
+
+      const res = await fetch(`${BASE_URL}/validate-step/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) throw new Error("Upload failed");
+
+      return result;
+    } catch (err) {
+      console.warn(`Upload attempt ${attempt} failed`, err);
+      if (attempt === maxAttempts) throw err;
+      await wait(400);
+    }
+  }
+}

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Camera } from "expo-camera";
 
 const { width, height } = Dimensions.get("window");
@@ -34,7 +34,8 @@ const steps = [
 
 export default function CookingScreen() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(0);
+  const { stepIndex } = useLocalSearchParams();
+  const [currentStep, setCurrentStep] = useState(parseInt(stepIndex || "0"));
   const step = steps[currentStep];
   const [hasPermission, setHasPermission] = useState(null);
 
@@ -52,6 +53,17 @@ export default function CookingScreen() {
       alert("Camera permission not granted");
     }
   };
+
+  if (currentStep >= steps.length) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.mealTitle}>All Steps Completed! 🎉</Text>
+        <Text style={styles.description}>
+          You’ve finished all the instructions. Great job!
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
