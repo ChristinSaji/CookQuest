@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.models import UserCreate, UserLogin, UserResponse, PasswordResetRequest, PasswordResetConfirm
+from app.models import (
+    UserCreate, UserLogin, UserResponse, PasswordResetRequest,
+    PasswordResetConfirm, TokenResponse, MessageResponse
+)
 from app.database import users_collection
 from app.auth import hash_password, verify_password, create_access_token, create_password_reset_token
 from app.email_utils import send_reset_email
-from bson.objectid import ObjectId
 from datetime import timedelta
 import jwt
 import os
@@ -25,16 +27,19 @@ def signup(user: UserCreate):
 
     return {"id": str(result.inserted_id), "name": user.name, "email": user.email}
 
-@router.post("/login")
+@router.post("/login", response_model=TokenResponse)
 def login(user: UserLogin):
     existing_user = users_collection.find_one({"email": user.email})
     if not existing_user or not verify_password(user.password, existing_user["password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    access_token = create_access_token(data={"sub": existing_user["email"]}, expires_delta=timedelta(minutes=30))
+    access_token = create_access_token(
+        data={"sub": existing_user["email"]},
+        expires_delta=timedelta(minutes=30)
+    )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/forgot-password")
+@router.post("/forgot-password", response_model=MessageResponse)
 def forgot_password(payload: PasswordResetRequest):
     user = users_collection.find_one({"email": payload.email})
     if not user:
@@ -44,7 +49,7 @@ def forgot_password(payload: PasswordResetRequest):
     send_reset_email(payload.email, token)
     return {"message": "Reset link sent to email"}
 
-@router.post("/reset-password")
+@router.post("/reset-password", response_model=MessageResponse)
 def reset_password(payload: PasswordResetConfirm):
     try:
         decoded = jwt.decode(payload.token, SECRET_KEY, algorithms=[ALGORITHM])
