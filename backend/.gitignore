@@ -10,6 +10,9 @@ venv/
 .env
 .env.local
 
+# GCP Credentials
+app/credentials/*.json
+
 # IDE & Editor Files
 .vscode/
 .idea/

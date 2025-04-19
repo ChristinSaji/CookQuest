@@ -5,7 +5,7 @@ from app.models import (
 )
 from app.database import users_collection
 from app.auth import hash_password, verify_password, create_access_token, create_password_reset_token
-from app.email_utils import send_reset_email
+from app.utils.email import send_reset_email
 from datetime import timedelta
 import jwt
 import os
