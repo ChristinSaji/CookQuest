@@ -36,8 +36,13 @@ export default function CookingScreen() {
   const router = useRouter();
   const { stepIndex } = useLocalSearchParams();
   const [currentStep, setCurrentStep] = useState(parseInt(stepIndex || "0"));
-  const step = steps[currentStep];
   const [hasPermission, setHasPermission] = useState(null);
+
+  useEffect(() => {
+    if (currentStep >= steps.length) {
+      router.replace("/(main)/completion");
+    }
+  }, [currentStep]);
 
   useEffect(() => {
     (async () => {
@@ -54,16 +59,9 @@ export default function CookingScreen() {
     }
   };
 
-  if (currentStep >= steps.length) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.mealTitle}>All Steps Completed! 🎉</Text>
-        <Text style={styles.description}>
-          You’ve finished all the instructions. Great job!
-        </Text>
-      </SafeAreaView>
-    );
-  }
+  const step = steps[currentStep];
+
+  if (!step) return null;
 
   return (
     <SafeAreaView style={styles.container}>
