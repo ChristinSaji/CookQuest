@@ -1,4 +1,6 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, conint
+from datetime import datetime, timezone
+from typing import Optional
 
 # -- User Models --
 class UserCreate(BaseModel):
@@ -44,3 +46,10 @@ class RecipeResponse(RecipeBase):
 class StepValidationResponse(BaseModel):
     success: bool
     step_index: int
+
+# -- Review Model --
+class ReviewCreate(BaseModel):
+    rating: conint(ge=1, le=5)
+    review: Optional[str] = ""
+    meal_id: Optional[str] = None
+    timestamp: datetime = datetime.now(timezone.utc)

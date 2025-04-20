@@ -130,3 +130,21 @@ export async function validateStep({ photoUri, stepIndex, maxAttempts = 3 }) {
     }
   }
 }
+
+export async function submitReview({ rating, review }) {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/review`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ rating, review }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Review submission failed");
+
+  return data;
+}

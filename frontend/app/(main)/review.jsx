@@ -15,6 +15,7 @@ import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
+import { submitReview } from "../../utils/api";
 
 import BackgroundSvg from "../../assets/svgs/bg-review.svg";
 import BasketImage from "../../assets/images/vegetable-basket.png";
@@ -27,9 +28,14 @@ export default function ReviewScreen() {
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = () => {
-    console.log({ rating, review });
-    setSubmitted(true);
+  const handleSubmit = async () => {
+    try {
+      await submitReview({ rating, review });
+      setSubmitted(true);
+    } catch (err) {
+      alert("Failed to submit review. Please try again.");
+      console.error(err);
+    }
   };
 
   return (
