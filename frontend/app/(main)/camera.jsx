@@ -27,7 +27,7 @@ export default function CameraScreen() {
 
   const cameraRef = useRef(null);
   const router = useRouter();
-  const { stepIndex } = useLocalSearchParams();
+  const { stepIndex, mealId } = useLocalSearchParams();
 
   useEffect(() => {
     (async () => {
@@ -57,7 +57,7 @@ export default function CameraScreen() {
       setShowSuccess(true);
       setTimeout(() => {
         const nextStep = parseInt(stepIndex) + 1;
-        router.replace(`/cooking?stepIndex=${nextStep}`);
+        router.replace(`/cooking?stepIndex=${nextStep}&mealId=${mealId}`);
       }, 1000);
     } catch (err) {
       alert("Failed to upload photo. Please try again.");

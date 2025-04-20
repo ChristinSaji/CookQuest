@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import { submitReview } from "../../utils/api";
 
@@ -27,11 +27,15 @@ export default function ReviewScreen() {
   const [review, setReview] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
+  const { mealId } = useLocalSearchParams();
 
   const handleSubmit = async () => {
     try {
-      await submitReview({ rating, review });
+      await submitReview({ rating, review, meal_id: mealId });
       setSubmitted(true);
+      setTimeout(() => {
+        router.push("/(main)/(tabs)/recipes");
+      }, 1500);
     } catch (err) {
       alert("Failed to submit review. Please try again.");
       console.error(err);

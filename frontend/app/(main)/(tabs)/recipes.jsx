@@ -102,7 +102,12 @@ export default function RecipesScreen() {
               keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
                 <Pressable
-                  onPress={() => router.push("/(main)/meal-info")}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(main)/meal-info",
+                      params: { mealId: item.id },
+                    })
+                  }
                   style={[
                     styles.card,
                     { backgroundColor: item.bgColor || "#FFF" },
@@ -126,9 +131,6 @@ export default function RecipesScreen() {
                       />
                     ))}
                   </View>
-                  <Pressable style={styles.hideButton}>
-                    <Text className="text-white text-xs">Hide</Text>
-                  </Pressable>
                 </Pressable>
               )}
             />
@@ -163,13 +165,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-  },
-  hideButton: {
-    backgroundColor: "#A1B75A",
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    alignSelf: "flex-end",
-    marginTop: 6,
   },
 });

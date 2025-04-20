@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, conint
 from datetime import datetime, timezone
-from typing import Optional
+from typing import List, Optional
 
 # -- User Models --
 class UserCreate(BaseModel):
@@ -39,8 +39,24 @@ class RecipeBase(BaseModel):
     bgColor: str
     category: str
 
+class Ingredient(BaseModel):
+    id: str
+    name: str
+    quantity: str
+    image: str
+
+class Nutrient(BaseModel):
+    id: str
+    name: str
+    value: str
+
 class RecipeResponse(RecipeBase):
     id: str
+    ingredients: List[Ingredient]
+    nutrients: List[Nutrient]
+
+    class Config:
+        from_attributes = True
 
 # -- Step Validation Model --
 class StepValidationResponse(BaseModel):

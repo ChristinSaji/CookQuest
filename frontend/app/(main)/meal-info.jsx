@@ -15,51 +15,35 @@ import {
   MaterialCommunityIcons,
   AntDesign,
 } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useState, useEffect } from "react";
 import BackgroundSvg from "../../assets/svgs/bg-meal.svg";
+import { getRecipeById } from "../../utils/api";
 
 const { width, height } = Dimensions.get("window");
 
-const ingredients = [
-  {
-    id: "1",
-    name: "Strawberries",
-    quantity: "400 grams",
-    image: require("../../assets/images/strawberry.png"),
-  },
-  {
-    id: "2",
-    name: "Apples",
-    quantity: "2",
-    image: require("../../assets/images/apple.png"),
-  },
-  {
-    id: "3",
-    name: "Bananas",
-    quantity: "2",
-    image: require("../../assets/images/banana.png"),
-  },
-  {
-    id: "4",
-    name: "Kiwifruits",
-    quantity: "3",
-    image: require("../../assets/images/kiwi.png"),
-  },
-];
-
-const nutrients = [
-  { id: "1", name: "Calories", value: "142" },
-  { id: "2", name: "Fat", value: "20 g" },
-  { id: "3", name: "Fiber", value: "6 g" },
-  { id: "4", name: "Vitamin", value: "2 mcg" },
-  { id: "5", name: "Iron", value: "4 mg" },
-];
-
 export default function MealInfoScreen() {
   const router = useRouter();
+  const { mealId } = useLocalSearchParams();
+
   const [activeTab, setActiveTab] = useState("Ingredients");
   const [isFavorite, setIsFavorite] = useState(false);
+  const [meal, setMeal] = useState(null);
+
+  useEffect(() => {
+    async function fetchMeal() {
+      if (!mealId) return;
+      try {
+        const data = await getRecipeById(mealId);
+        setMeal(data);
+      } catch (err) {
+        console.error("Failed to fetch meal info", err);
+      }
+    }
+    fetchMeal();
+  }, [mealId]);
+
+  if (!meal) return null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -77,8 +61,8 @@ export default function MealInfoScreen() {
       </Pressable>
 
       <View style={styles.textContainer}>
-        <Text style={styles.categoryText}>Breakfast</Text>
-        <Text style={styles.mealName}>Meal 1</Text>
+        <Text style={styles.categoryText}>{meal.category}</Text>
+        <Text style={styles.mealName}>{meal.name}</Text>
       </View>
 
       <View style={styles.mealImagesContainer}>
@@ -101,19 +85,17 @@ export default function MealInfoScreen() {
           <Entypo name="back-in-time" size={18} color="#A1B75A" />
           <Text style={styles.infoText}>20 min</Text>
         </View>
-
         <View style={styles.infoItem}>
           <Ionicons name="flame-outline" size={18} color="#A1B75A" />
           <Text style={styles.infoText}>142 cal</Text>
         </View>
-
         <View style={styles.infoItem}>
           <MaterialCommunityIcons
             name="silverware-fork-knife"
             size={18}
             color="#A1B75A"
           />
-          <Text style={styles.infoText}>Rated High!</Text>
+          <Text style={styles.infoText}>Rated {meal.rating}/5</Text>
         </View>
       </View>
 
@@ -156,11 +138,14 @@ export default function MealInfoScreen() {
       <View style={styles.infoSection}>
         {activeTab === "Ingredients" ? (
           <FlatList
-            data={ingredients}
-            keyExtractor={(item) => item.id}
+            data={meal.ingredients}
+            keyExtractor={(item, index) => item.name || index.toString()}
             renderItem={({ item }) => (
               <View style={styles.ingredientItem}>
-                <Image source={item.image} style={styles.ingredientImage} />
+                <Image
+                  source={{ uri: `http://192.168.2.154:8000${item.image}` }}
+                  style={styles.ingredientImage}
+                />
                 <Text style={styles.ingredientName}>{item.name}</Text>
                 <Text style={styles.ingredientQuantity}>{item.quantity}</Text>
               </View>
@@ -168,7 +153,7 @@ export default function MealInfoScreen() {
           />
         ) : (
           <FlatList
-            data={nutrients}
+            data={meal.nutrients}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View style={styles.nutrientItem}>
@@ -194,7 +179,12 @@ export default function MealInfoScreen() {
 
         <Pressable
           style={styles.startCookingButton}
-          onPress={() => router.push("/(main)/cooking")}
+          onPress={() =>
+            router.push({
+              pathname: "/(main)/cooking",
+              params: { mealId, stepIndex: 0 },
+            })
+          }
         >
           <Text style={styles.startCookingText}>Start Cooking</Text>
         </Pressable>

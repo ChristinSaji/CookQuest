@@ -94,6 +94,21 @@ export async function getRecipes(category = "Breakfast") {
   return data;
 }
 
+export async function getRecipeById(mealId) {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/recipes/${mealId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Failed to fetch recipe");
+
+  return data;
+}
+
 export async function validateStep({ photoUri, stepIndex, maxAttempts = 3 }) {
   const wait = (ms) => new Promise((res) => setTimeout(res, ms));
   const token = await getToken();
@@ -131,7 +146,7 @@ export async function validateStep({ photoUri, stepIndex, maxAttempts = 3 }) {
   }
 }
 
-export async function submitReview({ rating, review }) {
+export async function submitReview({ rating, review, meal_id }) {
   const token = await getToken();
 
   const response = await fetch(`${BASE_URL}/review`, {
@@ -140,7 +155,7 @@ export async function submitReview({ rating, review }) {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ rating, review }),
+    body: JSON.stringify({ rating, review, meal_id }),
   });
 
   const data = await response.json();

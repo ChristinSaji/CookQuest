@@ -34,13 +34,16 @@ const steps = [
 
 export default function CookingScreen() {
   const router = useRouter();
-  const { stepIndex } = useLocalSearchParams();
+  const { stepIndex, mealId } = useLocalSearchParams();
   const [currentStep, setCurrentStep] = useState(parseInt(stepIndex || "0"));
   const [hasPermission, setHasPermission] = useState(null);
 
   useEffect(() => {
     if (currentStep >= steps.length) {
-      router.replace("/(main)/completion");
+      router.replace({
+        pathname: "/(main)/completion",
+        params: { mealId },
+      });
     }
   }, [currentStep]);
 
@@ -53,7 +56,7 @@ export default function CookingScreen() {
 
   const openCamera = () => {
     if (hasPermission) {
-      router.push(`/camera?stepIndex=${currentStep}`);
+      router.push(`/camera?stepIndex=${currentStep}&mealId=${mealId}`);
     } else {
       alert("Camera permission not granted");
     }

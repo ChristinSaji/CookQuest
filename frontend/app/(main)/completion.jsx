@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 import BackgroundSvg from "../../assets/svgs/bg-completion.svg";
 import BasketImage from "../../assets/images/vegetable-basket.png";
@@ -17,6 +17,7 @@ const { width, height } = Dimensions.get("window");
 
 export default function CompletionScreen() {
   const router = useRouter();
+  const { mealId } = useLocalSearchParams();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -46,7 +47,12 @@ export default function CompletionScreen() {
       <View style={styles.buttonContainer}>
         <Pressable
           style={styles.primaryButton}
-          onPress={() => router.push("/(main)/review")}
+          onPress={() =>
+            router.push({
+              pathname: "/(main)/review",
+              params: { mealId },
+            })
+          }
         >
           <Text style={styles.buttonText}>Share your thoughts</Text>
         </Pressable>

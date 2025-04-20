@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, HTTPException
+from bson import ObjectId
 from app.database import db
 from app.dependencies import get_current_user
 from app.models import RecipeResponse
@@ -19,7 +20,26 @@ def get_recipes(category: str = Query(None), user=Depends(get_current_user)):
             "image": recipe["image"],
             "rating": recipe["rating"],
             "bgColor": recipe["bgColor"],
-            "category": recipe["category"]
+            "category": recipe["category"],
+            "ingredients": recipe.get("ingredients", []),
+            "nutrients": recipe.get("nutrients", [])
         })
 
     return recipes
+
+@router.get("/recipes/{recipe_id}", response_model=RecipeResponse)
+def get_recipe(recipe_id: str, user=Depends(get_current_user)):
+    recipe = recipes_collection.find_one({"_id": ObjectId(recipe_id)})
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    return {
+        "id": str(recipe["_id"]),
+        "name": recipe["name"],
+        "image": recipe["image"],
+        "rating": recipe["rating"],
+        "bgColor": recipe["bgColor"],
+        "category": recipe["category"],
+        "ingredients": recipe.get("ingredients", []),
+        "nutrients": recipe.get("nutrients", [])
+    }
