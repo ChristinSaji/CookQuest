@@ -162,3 +162,18 @@ export async function submitReview(formData) {
 
   return data;
 }
+
+export async function getReviews() {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/reviews`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Failed to fetch reviews");
+  return data;
+}

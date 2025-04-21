@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from bson import ObjectId
 from app.dependencies import get_current_user
-from app.database import db
+from app.database import db, recipes_collection
 from datetime import datetime, timezone
 from typing import Optional
 from app.utils.gcs_uploader import upload_review_image_to_gcs
@@ -26,6 +27,7 @@ async def submit_review(
 
     review_data = {
         "email": user["email"],
+        "name": user.get("name", user["email"].split("@")[0]),
         "rating": rating,
         "review": review,
         "meal_id": meal_id,
@@ -38,3 +40,21 @@ async def submit_review(
         raise HTTPException(status_code=500, detail="Failed to save review")
 
     return {"message": "Review submitted successfully"}
+
+@router.get("/reviews")
+def get_reviews(limit: int = 20):
+    reviews = list(reviews_collection.find().sort("timestamp", -1).limit(limit))
+
+    for review in reviews:
+        review["_id"] = str(review["_id"])
+        review["meal_name"] = "Unknown Meal"
+
+        if review.get("meal_id"):
+            try:
+                recipe = recipes_collection.find_one({"_id": ObjectId(review["meal_id"])})
+                if recipe:
+                    review["meal_name"] = recipe.get("name", "Unknown Meal")
+            except:
+                pass
+
+    return reviews
