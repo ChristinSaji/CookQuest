@@ -22,3 +22,15 @@ def upload_to_gcs(file: UploadFile, user_email: str, step_index: int) -> str:
     blob.upload_from_file(file.file, content_type=file.content_type)
 
     return blob.public_url
+
+def upload_review_image_to_gcs(file: UploadFile, user_email: str) -> str:
+    client = storage.Client()
+    bucket = client.bucket(BUCKET_NAME)
+
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    blob_name = f"reviews/{user_email}/review_{timestamp}.jpg"
+
+    blob = bucket.blob(blob_name)
+    blob.upload_from_file(file.file, content_type=file.content_type)
+
+    return blob.public_url

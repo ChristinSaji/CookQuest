@@ -11,6 +11,7 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -25,13 +26,42 @@ const { width, height } = Dimensions.get("window");
 export default function ReviewScreen() {
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
+  const [image, setImage] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
   const { mealId } = useLocalSearchParams();
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaType.IMAGE,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
-      await submitReview({ rating, review, meal_id: mealId });
+      const formData = new FormData();
+      formData.append("rating", rating);
+      formData.append("review", review);
+      formData.append("meal_id", mealId);
+
+      if (image) {
+        const filename = image.split("/").pop();
+        const match = /\.(\w+)$/.exec(filename ?? "");
+        const type = match ? `image/${match[1]}` : `image`;
+
+        formData.append("image", {
+          uri: image,
+          name: filename,
+          type,
+        });
+      }
+
+      await submitReview(formData);
       setSubmitted(true);
       setTimeout(() => {
         router.push("/(main)/(tabs)/recipes");
@@ -90,6 +120,14 @@ export default function ReviewScreen() {
               multiline
               style={styles.input}
             />
+
+            {image && (
+              <Image source={{ uri: image }} style={styles.previewImage} />
+            )}
+
+            <Pressable style={styles.uploadButton} onPress={pickImage}>
+              <Text style={styles.uploadText}>Upload Cooking Photo</Text>
+            </Pressable>
 
             <Pressable style={styles.submitButton} onPress={handleSubmit}>
               <FontAwesome name="paper-plane" size={20} color="#fff" />
@@ -157,6 +195,23 @@ const styles = StyleSheet.create({
     padding: 12,
     textAlignVertical: "top",
     marginBottom: 20,
+  },
+  previewImage: {
+    width: "100%",
+    height: 180,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  uploadButton: {
+    backgroundColor: "#E0E0E0",
+    padding: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  uploadText: {
+    color: "#444",
+    fontWeight: "600",
   },
   submitButton: {
     alignSelf: "center",
