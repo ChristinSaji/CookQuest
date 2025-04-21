@@ -12,7 +12,7 @@ import {
   Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
@@ -31,14 +31,46 @@ export default function ReviewScreen() {
   const router = useRouter();
   const { mealId } = useLocalSearchParams();
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.IMAGE,
-      quality: 1,
-    });
+  useEffect(() => {
+    (async () => {
+      const { status: cameraStatus } =
+        await ImagePicker.requestCameraPermissionsAsync();
+      const { status: mediaLibraryStatus } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      if (cameraStatus !== "granted" || mediaLibraryStatus !== "granted") {
+        alert("Camera and media library permissions are required.");
+      }
+    })();
+  }, []);
+
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets?.length > 0) {
+        setImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+    }
+  };
+
+  const takePhoto = async () => {
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ["images"],
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets?.length > 0) {
+        setImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error taking photo:", error);
     }
   };
 
@@ -125,9 +157,14 @@ export default function ReviewScreen() {
               <Image source={{ uri: image }} style={styles.previewImage} />
             )}
 
-            <Pressable style={styles.uploadButton} onPress={pickImage}>
-              <Text style={styles.uploadText}>Upload Cooking Photo</Text>
-            </Pressable>
+            <View style={styles.uploadOptions}>
+              <Pressable style={styles.uploadButton} onPress={pickImage}>
+                <Text style={styles.uploadText}>From Gallery</Text>
+              </Pressable>
+              <Pressable style={styles.uploadButton} onPress={takePhoto}>
+                <Text style={styles.uploadText}>Take Photo</Text>
+              </Pressable>
+            </View>
 
             <Pressable style={styles.submitButton} onPress={handleSubmit}>
               <FontAwesome name="paper-plane" size={20} color="#fff" />
@@ -202,12 +239,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
   },
+  uploadOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
   uploadButton: {
+    flex: 0.48,
     backgroundColor: "#E0E0E0",
     padding: 12,
     borderRadius: 10,
     alignItems: "center",
-    marginBottom: 20,
   },
   uploadText: {
     color: "#444",
