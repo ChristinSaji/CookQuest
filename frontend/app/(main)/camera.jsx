@@ -52,6 +52,7 @@ export default function CameraScreen() {
       const result = await validateStep({
         photoUri: photo.uri,
         stepIndex,
+        mealId,
       });
 
       setShowSuccess(true);

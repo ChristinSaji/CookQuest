@@ -6,46 +6,54 @@ import {
   Image,
   StyleSheet,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Camera } from "expo-camera";
+import { getMealSteps, getRecipeById } from "../../utils/api";
 
 const { width, height } = Dimensions.get("window");
-
-const steps = [
-  {
-    id: 1,
-    image: require("../../assets/images/cooking-step.png"),
-    text: "This is a part of instruction of how to make this recipe",
-  },
-  {
-    id: 2,
-    image: require("../../assets/images/cooking-step.png"),
-    text: "Now mix all the ingredients together in a bowl.",
-  },
-  {
-    id: 3,
-    image: require("../../assets/images/cooking-step.png"),
-    text: "Your meal is ready to be served!",
-  },
-];
 
 export default function CookingScreen() {
   const router = useRouter();
   const { stepIndex, mealId } = useLocalSearchParams();
+  const [steps, setSteps] = useState([]);
+  const [mealName, setMealName] = useState("");
   const [currentStep, setCurrentStep] = useState(parseInt(stepIndex || "0"));
   const [hasPermission, setHasPermission] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (currentStep >= steps.length) {
+    (async () => {
+      try {
+        const fetchedSteps = await getMealSteps(mealId);
+        const meal = await getRecipeById(mealId);
+        setMealName(meal.name);
+
+        const stepObjects = fetchedSteps.map((text, index) => ({
+          id: index + 1,
+          text,
+          image: require("../../assets/images/cooking-step.png"),
+        }));
+        setSteps(stepObjects);
+      } catch (error) {
+        alert("Failed to load steps or meal info.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [mealId]);
+
+  useEffect(() => {
+    if (steps.length && currentStep >= steps.length) {
       router.replace({
         pathname: "/(main)/completion",
         params: { mealId },
       });
     }
-  }, [currentStep]);
+  }, [steps, currentStep]);
 
   useEffect(() => {
     (async () => {
@@ -62,8 +70,15 @@ export default function CookingScreen() {
     }
   };
 
-  const step = steps[currentStep];
+  if (loading || !steps.length) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#A1B75A" />
+      </SafeAreaView>
+    );
+  }
 
+  const step = steps[currentStep];
   if (!step) return null;
 
   return (
@@ -72,7 +87,7 @@ export default function CookingScreen() {
         <Ionicons name="chevron-back" size={28} color="black" />
       </Pressable>
 
-      <Text style={styles.mealTitle}>Meal 1</Text>
+      <Text style={styles.mealTitle}>{mealName}</Text>
 
       <View style={styles.stepBox}>
         <Ionicons name="time-outline" size={18} color="#7D9A55" />

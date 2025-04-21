@@ -109,7 +109,27 @@ export async function getRecipeById(mealId) {
   return data;
 }
 
-export async function validateStep({ photoUri, stepIndex, maxAttempts = 3 }) {
+export async function getMealSteps(mealId) {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/meal-steps/${mealId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok)
+    throw new Error(data.detail || "Failed to fetch meal steps");
+  return data.steps;
+}
+
+export async function validateStep({
+  photoUri,
+  stepIndex,
+  mealId,
+  maxAttempts = 3,
+}) {
   const wait = (ms) => new Promise((res) => setTimeout(res, ms));
   const token = await getToken();
 
@@ -120,6 +140,7 @@ export async function validateStep({ photoUri, stepIndex, maxAttempts = 3 }) {
     type: "image/jpeg",
   });
   formData.append("step_index", stepIndex || "0");
+  formData.append("meal_id", mealId);
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
