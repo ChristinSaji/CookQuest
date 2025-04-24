@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Text,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import Slider from "@react-native-community/slider";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -47,6 +48,7 @@ export default function CameraScreen() {
 
   const uploadPhoto = async () => {
     if (!photo?.uri) return;
+    setShowSuccess("loading");
 
     try {
       const result = await validateStep({
@@ -55,13 +57,14 @@ export default function CameraScreen() {
         mealId,
       });
 
-      setShowSuccess(true);
+      setShowSuccess("success");
       setTimeout(() => {
         const nextStep = parseInt(stepIndex) + 1;
         router.replace(`/cooking?stepIndex=${nextStep}&mealId=${mealId}`);
       }, 1000);
     } catch (err) {
       alert("Failed to upload photo. Please try again.");
+      setShowSuccess(false);
     }
   };
 
@@ -79,7 +82,14 @@ export default function CameraScreen() {
         </TouchableOpacity>
       </View>
 
-      {showSuccess && (
+      {showSuccess === "loading" && (
+        <View style={styles.successOverlay}>
+          <ActivityIndicator size="large" color="#A1B75A" />
+          <Text style={styles.successText}>Evaluating Step...</Text>
+        </View>
+      )}
+
+      {showSuccess === "success" && (
         <View style={styles.successOverlay}>
           <FontAwesome name="check-circle" size={60} color="#4CAF50" />
           <Text style={styles.successText}>Step Completed!</Text>

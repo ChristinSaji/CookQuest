@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   ActivityIndicator,
+  AppState,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,14 +17,20 @@ import { getMealSteps, getRecipeById } from "../../utils/api";
 
 const { width, height } = Dimensions.get("window");
 
+let globalTimerStart = null;
+
 export default function CookingScreen() {
   const router = useRouter();
   const { stepIndex, mealId } = useLocalSearchParams();
+
   const [steps, setSteps] = useState([]);
   const [mealName, setMealName] = useState("");
   const [currentStep, setCurrentStep] = useState(parseInt(stepIndex || "0"));
   const [hasPermission, setHasPermission] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [startTime, setStartTime] = useState(globalTimerStart || null);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -38,6 +45,12 @@ export default function CookingScreen() {
           image: require("../../assets/images/cooking-step.png"),
         }));
         setSteps(stepObjects);
+
+        if (!globalTimerStart) {
+          const now = Date.now();
+          setStartTime(now);
+          globalTimerStart = now;
+        }
       } catch (error) {
         alert("Failed to load steps or meal info.");
       } finally {
@@ -47,10 +60,21 @@ export default function CookingScreen() {
   }, [mealId]);
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      if (startTime) {
+        const now = Date.now();
+        setElapsedTime(Math.floor((now - startTime) / 1000));
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [startTime]);
+
+  useEffect(() => {
     if (steps.length && currentStep >= steps.length) {
+      globalTimerStart = null;
       router.replace({
         pathname: "/(main)/completion",
-        params: { mealId },
+        params: { mealId, elapsedTime: elapsedTime.toString() },
       });
     }
   }, [steps, currentStep]);
@@ -68,6 +92,12 @@ export default function CookingScreen() {
     } else {
       alert("Camera permission not granted");
     }
+  };
+
+  const formatTime = (totalSeconds) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}m ${seconds}s`;
   };
 
   if (loading || !steps.length) {
@@ -88,6 +118,7 @@ export default function CookingScreen() {
       </Pressable>
 
       <Text style={styles.mealTitle}>{mealName}</Text>
+      <Text style={styles.timerText}>⏱ {formatTime(elapsedTime)}</Text>
 
       <View style={styles.stepBox}>
         <Ionicons name="time-outline" size={18} color="#7D9A55" />
@@ -97,7 +128,6 @@ export default function CookingScreen() {
       </View>
 
       <Image source={step.image} style={styles.image} resizeMode="contain" />
-
       <Text style={styles.description}>{step.text}</Text>
 
       <Pressable style={styles.cameraButton} onPress={openCamera}>
@@ -126,6 +156,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 60,
     color: "black",
+  },
+  timerText: {
+    marginTop: 5,
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#555",
   },
   stepBox: {
     flexDirection: "row",

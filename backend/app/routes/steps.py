@@ -4,6 +4,7 @@ from app.dependencies import get_current_user
 from app.models import StepValidationResponse
 from app.database import db
 from app.utils.gcs_uploader import upload_to_gcs
+from app.utils.llm_evaluator import evaluate_step_with_llm
 
 router = APIRouter()
 meal_steps_collection = db["meal_steps"]
@@ -30,6 +31,14 @@ async def validate_step(
 
     image_url = upload_to_gcs(file, user["email"], meal_id, step_index)
 
+    meal_doc = meal_steps_collection.find_one({"meal_id": meal_id})
+    if not meal_doc or step_index >= len(meal_doc["steps"]):
+        raise HTTPException(status_code=404, detail="Step description not found")
+
+    step_description = meal_doc["steps"][step_index]
+
+    feedback, score = evaluate_step_with_llm(image_url, step_description)
+
     user_steps_collection.update_one(
         {
             "user_id": str(user["_id"]),
@@ -42,10 +51,12 @@ async def validate_step(
                 "timestamp": datetime.now(timezone.utc),
                 "validated": True,
                 "image_url": image_url,
-                "image_size": len(contents)
+                "image_size": len(contents),
+                "step_feedback": feedback,
+                "step_score": score,
             }
         },
         upsert=True
     )
 
-    return {"success": True, "step_index": step_index}
+    return {"success": True, "step_index": step_index, "score": score, "feedback": feedback}
