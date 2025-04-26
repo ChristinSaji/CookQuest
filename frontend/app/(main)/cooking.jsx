@@ -7,17 +7,15 @@ import {
   StyleSheet,
   Dimensions,
   ActivityIndicator,
-  AppState,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Camera } from "expo-camera";
 import { getMealSteps, getRecipeById } from "../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get("window");
-
-let globalTimerStart = null;
 
 export default function CookingScreen() {
   const router = useRouter();
@@ -28,8 +26,6 @@ export default function CookingScreen() {
   const [currentStep, setCurrentStep] = useState(parseInt(stepIndex || "0"));
   const [hasPermission, setHasPermission] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const [startTime, setStartTime] = useState(globalTimerStart || null);
   const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
@@ -46,10 +42,11 @@ export default function CookingScreen() {
         }));
         setSteps(stepObjects);
 
-        if (!globalTimerStart) {
-          const now = Date.now();
-          setStartTime(now);
-          globalTimerStart = now;
+        if (parseInt(stepIndex) === 0) {
+          await AsyncStorage.setItem(
+            "cooking_start_time",
+            Date.now().toString()
+          );
         }
       } catch (error) {
         alert("Failed to load steps or meal info.");
@@ -60,18 +57,21 @@ export default function CookingScreen() {
   }, [mealId]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (startTime) {
+    const interval = setInterval(async () => {
+      const startTimeStr = await AsyncStorage.getItem("cooking_start_time");
+      if (startTimeStr) {
+        const startTime = parseInt(startTimeStr);
         const now = Date.now();
-        setElapsedTime(Math.floor((now - startTime) / 1000));
+        const diff = Math.floor((now - startTime) / 1000);
+        setElapsedTime(diff);
       }
     }, 1000);
+
     return () => clearInterval(interval);
-  }, [startTime]);
+  }, []);
 
   useEffect(() => {
     if (steps.length && currentStep >= steps.length) {
-      globalTimerStart = null;
       router.replace({
         pathname: "/(main)/completion",
         params: { mealId, elapsedTime: elapsedTime.toString() },

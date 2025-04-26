@@ -18,7 +18,8 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import BackgroundSvg from "../../assets/svgs/bg-meal.svg";
-import { getRecipeById } from "../../utils/api";
+import { BASE_IMAGE_URL, getRecipeById } from "../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get("window");
 
@@ -143,7 +144,9 @@ export default function MealInfoScreen() {
             renderItem={({ item }) => (
               <View style={styles.ingredientItem}>
                 <Image
-                  source={{ uri: `http://192.168.2.154:8000${item.image}` }}
+                  source={{
+                    uri: `${BASE_IMAGE_URL}${item.image}`,
+                  }}
                   style={styles.ingredientImage}
                 />
                 <Text style={styles.ingredientName}>{item.name}</Text>
@@ -179,12 +182,20 @@ export default function MealInfoScreen() {
 
         <Pressable
           style={styles.startCookingButton}
-          onPress={() =>
-            router.push({
-              pathname: "/(main)/cooking",
-              params: { mealId, stepIndex: 0 },
-            })
-          }
+          onPress={async () => {
+            try {
+              await AsyncStorage.setItem(
+                "cooking_start_time",
+                Date.now().toString()
+              );
+              router.push({
+                pathname: "/(main)/cooking",
+                params: { mealId, stepIndex: 0 },
+              });
+            } catch (err) {
+              console.error("Failed to start cooking timer", err);
+            }
+          }}
         >
           <Text style={styles.startCookingText}>Start Cooking</Text>
         </Pressable>

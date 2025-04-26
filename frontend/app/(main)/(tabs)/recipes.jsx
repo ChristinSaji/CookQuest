@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
-import { getRecipes } from "../../../utils/api";
+import { BASE_IMAGE_URL, getRecipes } from "../../../utils/api";
 
 export default function RecipesScreen() {
   const router = useRouter();
@@ -114,7 +114,7 @@ export default function RecipesScreen() {
                   ]}
                 >
                   <Image
-                    source={{ uri: `http://192.168.2.154:8000${item.image}` }}
+                    source={{ uri: `${BASE_IMAGE_URL}${item.image}` }}
                     className="w-full h-36"
                     resizeMode="contain"
                   />

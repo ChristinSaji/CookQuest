@@ -1,8 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
-const BASE_URL = "http://192.168.2.154:8000";
+export const BASE_URL = Constants.expoConfig?.extra?.BASE_URL;
+export const BASE_IMAGE_URL = Constants.expoConfig?.extra?.BASE_IMAGE_URL;
 
-async function saveToken(token) {
+export async function saveToken(token) {
   try {
     await AsyncStorage.setItem("access_token", token);
   } catch (e) {
@@ -10,7 +12,7 @@ async function saveToken(token) {
   }
 }
 
-async function getToken() {
+export async function getToken() {
   try {
     return await AsyncStorage.getItem("access_token");
   } catch (e) {
@@ -19,7 +21,7 @@ async function getToken() {
   }
 }
 
-async function removeToken() {
+export async function removeToken() {
   try {
     await AsyncStorage.removeItem("access_token");
   } catch (e) {
@@ -84,9 +86,7 @@ export async function getRecipes(category = "Breakfast") {
   const token = await getToken();
 
   const response = await fetch(`${BASE_URL}/recipes?category=${category}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   const data = await response.json();
@@ -98,14 +98,11 @@ export async function getRecipeById(mealId) {
   const token = await getToken();
 
   const response = await fetch(`${BASE_URL}/recipes/${mealId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   const data = await response.json();
   if (!response.ok) throw new Error(data.detail || "Failed to fetch recipe");
-
   return data;
 }
 
@@ -113,9 +110,7 @@ export async function getMealSteps(mealId) {
   const token = await getToken();
 
   const response = await fetch(`${BASE_URL}/meal-steps/${mealId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   const data = await response.json();
@@ -145,7 +140,6 @@ export async function validateStep({
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await wait(200);
-
       const res = await fetch(`${BASE_URL}/validate-step/`, {
         method: "POST",
         headers: {
@@ -157,7 +151,6 @@ export async function validateStep({
 
       const result = await res.json();
       if (!res.ok || !result.success) throw new Error("Upload failed");
-
       return result;
     } catch (err) {
       console.warn(`Upload attempt ${attempt} failed`, err);
@@ -167,14 +160,44 @@ export async function validateStep({
   }
 }
 
+export async function resetCookingSession() {
+  try {
+    await AsyncStorage.removeItem("cooking_start_time");
+  } catch (e) {
+    console.error("Failed to reset cooking session:", e);
+  }
+}
+
+export function formatElapsedTime(seconds = 0) {
+  const minutes = Math.floor(seconds / 60);
+  const remaining = seconds % 60;
+  return `${minutes}m ${remaining}s`;
+}
+
+export async function getCompletionSummary(mealId, elapsedTime = null) {
+  const token = await getToken();
+
+  let url = `${BASE_URL}/completion-summary/${mealId}`;
+  if (elapsedTime !== null) {
+    url += `?elapsed_time=${elapsedTime}`;
+  }
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Failed to fetch summary");
+  return data;
+}
+
 export async function submitReview(formData) {
   const token = await getToken();
 
   const response = await fetch(`${BASE_URL}/review`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
     body: formData,
   });
 
@@ -189,9 +212,7 @@ export async function getReviews() {
 
   const response = await fetch(`${BASE_URL}/reviews`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   const data = await response.json();

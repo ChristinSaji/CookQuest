@@ -1,4 +1,9 @@
-from app.database import db
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "app")))
+
+from database import db
 
 meal_steps_collection = db["meal_steps"]
 

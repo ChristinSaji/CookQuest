@@ -21,7 +21,7 @@ export default function ResetPasswordScreen() {
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [token, setToken] = useState(""); // Paste token from email
+  const [token, setToken] = useState("");
 
   const handleReset = async () => {
     if (!newPassword || !confirmPassword || !token) {

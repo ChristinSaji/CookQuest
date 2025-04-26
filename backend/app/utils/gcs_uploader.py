@@ -1,6 +1,6 @@
 from google.cloud import storage
 from fastapi import UploadFile
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from dotenv import load_dotenv
 
@@ -15,7 +15,8 @@ def upload_to_gcs(file: UploadFile, user_email: str, meal_id: str, step_index: i
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
 
-    blob_name = f"step-validations/{user_email}/meal_{meal_id}_step_{step_index}.jpg"
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S-%f")
+    blob_name = f"step-validations/{user_email}/meal_{meal_id}_step_{step_index}_{timestamp}.jpg"
 
     blob = bucket.blob(blob_name)
     blob.upload_from_file(file.file, content_type=file.content_type)
@@ -26,7 +27,7 @@ def upload_review_image_to_gcs(file: UploadFile, user_email: str) -> str:
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
 
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S-%f")
     blob_name = f"reviews/{user_email}/review_{timestamp}.jpg"
 
     blob = bucket.blob(blob_name)
