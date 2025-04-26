@@ -219,3 +219,19 @@ export async function getReviews() {
   if (!response.ok) throw new Error(data.detail || "Failed to fetch reviews");
   return data;
 }
+
+export async function getHistory() {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/history`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Failed to fetch history");
+
+  return data;
+}

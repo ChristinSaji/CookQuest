@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function TabLayout() {
   return (
@@ -41,6 +41,15 @@ export default function TabLayout() {
           title: "Social",
           tabBarIcon: ({ color }) => (
             <Ionicons name="people-outline" color={color} size={22} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: "History",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="history" color={color} size={22} />
           ),
         }}
       />

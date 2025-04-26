@@ -3,10 +3,13 @@ from app.dependencies import get_current_user
 from app.database import db
 from bson import ObjectId
 from typing import Optional
+from datetime import datetime, timezone
 
 router = APIRouter()
+
 user_steps_collection = db["user_steps"]
 recipes_collection = db["recipes"]
+cooking_history_collection = db["cooking_history"]
 
 @router.get("/completion-summary/{meal_id}")
 def get_completion_summary(
@@ -51,6 +54,25 @@ def get_completion_summary(
     minutes = elapsed_seconds // 60
     seconds = elapsed_seconds % 60
     formatted_time = f"{minutes}m {seconds}s"
+
+    cooking_history_collection.insert_one({
+        "user_id": user_id,
+        "meal_id": meal_id,
+        "meal_name": meal["name"],
+        "total_score": total_score,
+        "elapsed_time": formatted_time,
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+        "steps": [
+            {
+                "step_index": step.get("step_index"),
+                "step_description": step.get("step_description", ""),
+                "image_url": step.get("image_url"),
+                "step_feedback": step.get("step_feedback", ""),
+                "step_score": step.get("step_score", 0)
+            }
+            for step in steps
+        ]
+    })
 
     return {
         "meal_name": meal["name"],
