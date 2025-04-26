@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from app.routes import users, recipes, steps, reviews, completion, history
+from app.routes import users, recipes, steps, reviews, completion, history, leaderboard
 
 app = FastAPI(root_path="/cookquest/api")
 
@@ -12,6 +12,7 @@ app.include_router(steps.router)
 app.include_router(reviews.router, tags=["Reviews"])
 app.include_router(completion.router)
 app.include_router(history.router)
+app.include_router(leaderboard.router, tags=["Leaderboard"])
 
 @app.get("/")
 def home():

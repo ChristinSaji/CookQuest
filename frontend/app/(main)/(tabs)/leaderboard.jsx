@@ -1,90 +1,42 @@
+import { useState, useEffect } from "react";
 import {
-  View,
+  SafeAreaView,
+  ScrollView,
   Text,
-  Pressable,
+  View,
   StyleSheet,
+  Pressable,
   FlatList,
   Image,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useState } from "react";
+import { getLeaderboard } from "../../../utils/api";
 
-const leaderboardData = [
-  {
-    id: "1",
-    rank: 1,
-    name: "Paul C. Ramos",
-    score: 5075,
-    image: require("../../../assets/images/profile-pic.png"),
-  },
-  {
-    id: "2",
-    rank: 2,
-    name: "Derrick L. Thoman",
-    score: 4985,
-    image: require("../../../assets/images/profile-pic.png"),
-  },
-  {
-    id: "3",
-    rank: 3,
-    name: "Kelsey T. Donovan",
-    score: 4642,
-    image: require("../../../assets/images/profile-pic.png"),
-  },
-  {
-    id: "4",
-    rank: 4,
-    name: "Jack L. Gregory",
-    score: 3874,
-    image: require("../../../assets/images/profile-pic.png"),
-  },
-  {
-    id: "5",
-    rank: 5,
-    name: "Mary R. Mercado",
-    score: 3567,
-    image: require("../../../assets/images/profile-pic.png"),
-  },
-  {
-    id: "6",
-    rank: 6,
-    name: "Theresa N. Maki",
-    score: 3478,
-    image: require("../../../assets/images/profile-pic.png"),
-  },
-  {
-    id: "7",
-    rank: 7,
-    name: "Jack L. Gregory",
-    score: 3387,
-    image: require("../../../assets/images/profile-pic.png"),
-  },
-  {
-    id: "8",
-    rank: 8,
-    name: "James R. Stokes",
-    score: 3257,
-    image: require("../../../assets/images/profile-pic.png"),
-  },
-  {
-    id: "9",
-    rank: 9,
-    name: "David B. Rodriguez",
-    score: 3250,
-    image: require("../../../assets/images/profile-pic.png"),
-  },
-  {
-    id: "10",
-    rank: 10,
-    name: "Annette R. Allen",
-    score: 3212,
-    image: require("../../../assets/images/profile-pic.png"),
-  },
-];
+const defaultProfileImage = require("../../../assets/images/profile-pic.png");
 
 export default function LeaderboardScreen() {
+  const [leaders, setLeaders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("week");
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const data = await getLeaderboard();
+        setLeaders(data);
+      } catch (error) {
+        console.error("Failed to load leaderboard", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, []);
+
+  if (loading) {
+    return <Text style={{ padding: 20 }}>Loading...</Text>;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -127,29 +79,29 @@ export default function LeaderboardScreen() {
       <Text style={styles.leaderboardTitle}>Leaderboard</Text>
 
       <FlatList
-        data={leaderboardData}
-        keyExtractor={(item) => item.id}
+        data={leaders}
+        keyExtractor={(item) => item.user_id}
         contentContainerStyle={{ paddingTop: 10 }}
         renderItem={({ item, index }) => (
           <View
             style={[styles.leaderboardItem, index === 0 && { marginTop: 10 }]}
           >
             <View style={styles.rankContainer}>
-              {item.rank <= 3 ? (
+              {index < 3 ? (
                 <FontAwesome5
                   name="trophy"
                   size={26}
                   color={
-                    item.rank === 1
+                    index === 0
                       ? "#FFD700"
-                      : item.rank === 2
+                      : index === 1
                       ? "#C0C0C0"
                       : "#CD7F32"
                   }
                 />
               ) : (
                 <View style={styles.rankBadge}>
-                  <Text style={styles.rankText}>{item.rank}</Text>
+                  <Text style={styles.rankText}>{index + 1}</Text>
                 </View>
               )}
             </View>
@@ -157,14 +109,14 @@ export default function LeaderboardScreen() {
             <View style={styles.verticalDivider} />
 
             <View style={styles.userInfo}>
-              <Image source={item.image} style={styles.profileImage} />
-              <Text style={styles.userName}>{item.name}</Text>
+              <Image source={defaultProfileImage} style={styles.profileImage} />
+              <Text style={styles.userName}>{item.name || "Unknown"}</Text>
             </View>
 
             <View style={styles.verticalDivider} />
 
             <View style={styles.scoreContainer}>
-              <Text style={styles.userScore}>{item.score}</Text>
+              <Text style={styles.userScore}>{item.total_score} pts</Text>
             </View>
           </View>
         )}
