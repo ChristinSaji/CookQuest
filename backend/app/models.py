@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import List
+from typing import List, Optional
 
 # -- User Models --
 class UserCreate(BaseModel):
@@ -29,6 +29,14 @@ class TokenResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+class UserUpdateRequest(BaseModel):
+    name: Optional[str]
+    gender: Optional[str]
+    age: Optional[int]
+    height: Optional[int]
+    weight: Optional[int]
+    bedtime: Optional[str]
 
 # -- Recipe Models --
 class RecipeBase(BaseModel):

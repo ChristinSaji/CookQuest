@@ -14,7 +14,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
-import { BASE_IMAGE_URL, getRecipes } from "../../../utils/api";
+import { BASE_IMAGE_URL, getRecipes, getUserProfile } from "../../../utils/api";
+
+const defaultMale = require("../../../assets/images/default-pp-male.jpg");
+const defaultFemale = require("../../../assets/images/default-pp-female.jpg");
 
 export default function RecipesScreen() {
   const router = useRouter();
@@ -22,6 +25,7 @@ export default function RecipesScreen() {
   const [selectedCategory, setSelectedCategory] = useState("Breakfast");
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [gender, setGender] = useState("male");
 
   const categories = [
     { label: "Breakfast", value: "Breakfast" },
@@ -34,6 +38,10 @@ export default function RecipesScreen() {
     fetchRecipes();
   }, [selectedCategory]);
 
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
   const fetchRecipes = async () => {
     setLoading(true);
     try {
@@ -43,6 +51,17 @@ export default function RecipesScreen() {
       console.error("Failed to fetch recipes:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    try {
+      const profile = await getUserProfile();
+      if (profile?.gender) {
+        setGender(profile.gender);
+      }
+    } catch (error) {
+      console.error("Failed to load user profile:", error);
     }
   };
 
@@ -59,9 +78,9 @@ export default function RecipesScreen() {
           <Pressable className="p-2">
             <Ionicons name="menu" size={28} color="black" />
           </Pressable>
-          <Pressable onPress={() => router.push("/(onboarding)/userinfo")}>
+          <Pressable onPress={() => router.push("/(onboarding)/profile")}>
             <Image
-              source={require("../../../assets/images/profile-pic.png")}
+              source={gender === "female" ? defaultFemale : defaultMale}
               className="w-10 h-10 rounded-full"
             />
           </Pressable>

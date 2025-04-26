@@ -10,14 +10,16 @@ import {
   Image,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { getLeaderboard } from "../../../utils/api";
+import { getLeaderboard, getUserProfile } from "../../../utils/api";
 
-const defaultProfileImage = require("../../../assets/images/profile-pic.png");
+import defaultMale from "../../../assets/images/default-pp-male.jpg";
+import defaultFemale from "../../../assets/images/default-pp-female.jpg";
 
 export default function LeaderboardScreen() {
   const [leaders, setLeaders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("week");
+  const [gender, setGender] = useState("male");
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -32,7 +34,19 @@ export default function LeaderboardScreen() {
       }
     };
 
+    const fetchProfile = async () => {
+      try {
+        const profile = await getUserProfile();
+        if (profile?.gender) {
+          setGender(profile.gender);
+        }
+      } catch (error) {
+        console.error("Failed to load user profile:", error);
+      }
+    };
+
     fetchLeaderboard();
+    fetchProfile();
   }, [activeTab]);
 
   if (loading) {
@@ -110,7 +124,10 @@ export default function LeaderboardScreen() {
             <View style={styles.verticalDivider} />
 
             <View style={styles.userInfo}>
-              <Image source={defaultProfileImage} style={styles.profileImage} />
+              <Image
+                source={gender === "female" ? defaultFemale : defaultMale}
+                style={styles.profileImage}
+              />
               <Text style={styles.userName}>{item.name || "Unknown"}</Text>
             </View>
 

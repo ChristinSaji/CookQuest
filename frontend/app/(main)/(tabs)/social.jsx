@@ -7,25 +7,20 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  Linking,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { getReviews } from "../../../utils/api";
+import { getReviews, getUserProfile } from "../../../utils/api";
 
-import LocalProfile from "../../../assets/images/profile-pic.png";
 import DefaultPost from "../../../assets/images/default-post.jpg";
+import defaultMale from "../../../assets/images/default-pp-male.jpg";
+import defaultFemale from "../../../assets/images/default-pp-female.jpg";
 
 export default function SocialScreen() {
   const router = useRouter();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [aspectRatios, setAspectRatios] = useState({});
-
-  const recommendations = [
-    { name: "Eric Arnold", followers: "998K" },
-    { name: "Lucia Jones", followers: "243K" },
-    { name: "Anisa Jones", followers: "111K" },
-  ];
+  const [gender, setGender] = useState("male");
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -62,7 +57,19 @@ export default function SocialScreen() {
       }
     };
 
+    const fetchProfile = async () => {
+      try {
+        const profile = await getUserProfile();
+        if (profile?.gender) {
+          setGender(profile.gender);
+        }
+      } catch (error) {
+        console.error("Failed to load user profile:", error);
+      }
+    };
+
     fetchReviews();
+    fetchProfile();
   }, []);
 
   if (loading) {
@@ -96,7 +103,10 @@ export default function SocialScreen() {
             </View>
 
             <View style={styles.reviewHeader}>
-              <Image source={LocalProfile} style={styles.profileImage} />
+              <Image
+                source={gender === "female" ? defaultFemale : defaultMale}
+                style={styles.profileImage}
+              />
               <Text style={styles.userName}>
                 {review.name} rated this recipe {review.rating} Stars!!
               </Text>
@@ -131,22 +141,6 @@ export default function SocialScreen() {
               )}
               <Text style={styles.reviewText}>{review.review}</Text>
             </View>
-          </View>
-        ))}
-
-        <Text style={styles.recommendationsTitle}>Follow Recommendations</Text>
-        {recommendations.map((user, index) => (
-          <View key={index} style={styles.recommendation}>
-            <Image source={LocalProfile} style={styles.recommendationImage} />
-            <View>
-              <Text style={styles.recommendationName}>{user.name}</Text>
-              <Text style={styles.followerCount}>
-                {user.followers} Followers
-              </Text>
-            </View>
-            <Pressable style={styles.followButton}>
-              <Text style={styles.followButtonText}>Follow</Text>
-            </Pressable>
           </View>
         ))}
       </ScrollView>
@@ -214,42 +208,5 @@ const styles = StyleSheet.create({
   reviewText: {
     fontSize: 14,
     color: "#555",
-  },
-  recommendationsTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  recommendation: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  recommendationImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-  },
-  recommendationName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-  },
-  followerCount: {
-    fontSize: 12,
-    color: "#888",
-  },
-  followButton: {
-    backgroundColor: "#A1B75A",
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    marginLeft: "auto",
-  },
-  followButtonText: {
-    color: "#fff",
-    fontWeight: "600",
   },
 });

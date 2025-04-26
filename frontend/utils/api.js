@@ -82,6 +82,36 @@ export async function resetPassword(token, new_password) {
   return data;
 }
 
+export async function getUserProfile() {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/auth/user/me`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Failed to fetch profile");
+  return data;
+}
+
+export async function updateUserProfile(profileData) {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/auth/user/update-profile`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(profileData),
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Failed to update profile");
+  return data;
+}
+
 export async function getRecipes(category = "Breakfast") {
   const token = await getToken();
 
