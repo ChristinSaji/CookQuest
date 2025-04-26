@@ -236,10 +236,10 @@ export async function getHistory() {
   return data;
 }
 
-export async function getLeaderboard() {
+export async function getLeaderboard(period = "week") {
   const token = await getToken();
 
-  const response = await fetch(`${BASE_URL}/leaderboard`, {
+  const response = await fetch(`${BASE_URL}/leaderboard?period=${period}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

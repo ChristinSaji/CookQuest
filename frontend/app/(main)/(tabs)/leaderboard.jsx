@@ -22,7 +22,8 @@ export default function LeaderboardScreen() {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const data = await getLeaderboard();
+        setLoading(true);
+        const data = await getLeaderboard(activeTab);
         setLeaders(data);
       } catch (error) {
         console.error("Failed to load leaderboard", error);
@@ -32,7 +33,7 @@ export default function LeaderboardScreen() {
     };
 
     fetchLeaderboard();
-  }, []);
+  }, [activeTab]);
 
   if (loading) {
     return <Text style={{ padding: 20 }}>Loading...</Text>;

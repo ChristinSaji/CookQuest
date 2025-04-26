@@ -61,7 +61,7 @@ def get_completion_summary(
         "meal_name": meal["name"],
         "total_score": total_score,
         "elapsed_time": formatted_time,
-        "completed_at": datetime.now(timezone.utc).isoformat(),
+        "completed_at": datetime.now(timezone.utc),
         "steps": [
             {
                 "step_index": step.get("step_index"),
