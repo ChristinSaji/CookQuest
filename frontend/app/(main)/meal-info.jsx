@@ -18,7 +18,13 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import BackgroundSvg from "../../assets/svgs/bg-meal.svg";
-import { BASE_IMAGE_URL, getRecipeById } from "../../utils/api";
+import {
+  BASE_IMAGE_URL,
+  getRecipeById,
+  getLikedMeals,
+  likeMeal,
+  unlikeMeal,
+} from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get("window");
@@ -41,8 +47,33 @@ export default function MealInfoScreen() {
         console.error("Failed to fetch meal info", err);
       }
     }
+
+    async function fetchFavoriteStatus() {
+      try {
+        const liked = await getLikedMeals();
+        setIsFavorite(liked.includes(mealId));
+      } catch (err) {
+        console.error("Failed to fetch liked meals", err);
+      }
+    }
+
     fetchMeal();
+    fetchFavoriteStatus();
   }, [mealId]);
+
+  const handleLikeToggle = async () => {
+    try {
+      if (isFavorite) {
+        await unlikeMeal(mealId);
+        setIsFavorite(false);
+      } else {
+        await likeMeal(mealId);
+        setIsFavorite(true);
+      }
+    } catch (err) {
+      console.error("Failed to toggle like status", err);
+    }
+  };
 
   if (!meal) return null;
 
@@ -169,10 +200,7 @@ export default function MealInfoScreen() {
       </View>
 
       <View style={styles.bottomSection}>
-        <Pressable
-          style={styles.favoriteButton}
-          onPress={() => setIsFavorite(!isFavorite)}
-        >
+        <Pressable style={styles.favoriteButton} onPress={handleLikeToggle}>
           <AntDesign
             name={isFavorite ? "heart" : "hearto"}
             size={24}

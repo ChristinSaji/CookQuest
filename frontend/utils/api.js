@@ -112,6 +112,56 @@ export async function updateUserProfile(profileData) {
   return data;
 }
 
+export async function likeMeal(mealId) {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/auth/user/like-meal`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ meal_id: mealId }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Failed to like meal");
+
+  return data;
+}
+
+export async function unlikeMeal(mealId) {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/auth/user/unlike-meal`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ meal_id: mealId }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Failed to unlike meal");
+
+  return data;
+}
+
+export async function getLikedMeals() {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/auth/user/liked-meals`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await response.json();
+  if (!response.ok)
+    throw new Error(data.detail || "Failed to fetch liked meals");
+
+  return data.liked_meals;
+}
+
 export async function getRecipes(category = "Breakfast") {
   const token = await getToken();
 

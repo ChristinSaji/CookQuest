@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.models import (
     UserCreate, UserLogin, UserResponse, PasswordResetRequest,
-    PasswordResetConfirm, TokenResponse, MessageResponse, UserUpdateRequest
+    PasswordResetConfirm, TokenResponse, MessageResponse, UserUpdateRequest,
+    LikeMealRequest, LikedMealsResponse
 )
 from app.database import users_collection
 from app.auth import hash_password, verify_password, create_access_token, create_password_reset_token
@@ -32,6 +33,7 @@ def signup(user: UserCreate):
         "height": None,
         "weight": None,
         "bedtime": None,
+        "liked_meals": [],
     }
     result = users_collection.insert_one(user_dict)
 
@@ -105,3 +107,31 @@ async def update_profile(
     )
 
     return {"message": "Profile updated successfully"}
+
+@router.post("/user/like-meal", response_model=MessageResponse)
+async def like_meal(payload: LikeMealRequest, user=Depends(get_current_user)):
+    meal_id = payload.meal_id
+
+    users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$addToSet": {"liked_meals": meal_id}}
+    )
+
+    return {"message": "Meal liked successfully"}
+
+@router.post("/user/unlike-meal", response_model=MessageResponse)
+async def unlike_meal(payload: LikeMealRequest, user=Depends(get_current_user)):
+    meal_id = payload.meal_id
+
+    users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$pull": {"liked_meals": meal_id}}
+    )
+
+    return {"message": "Meal unliked successfully"}
+
+@router.get("/user/liked-meals", response_model=LikedMealsResponse)
+async def get_liked_meals(user=Depends(get_current_user)):
+    user_data = users_collection.find_one({"_id": user["_id"]})
+    liked_meals = user_data.get("liked_meals", [])
+    return {"liked_meals": liked_meals}

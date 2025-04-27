@@ -14,7 +14,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
-import { BASE_IMAGE_URL, getRecipes, getUserProfile } from "../../../utils/api";
+import {
+  BASE_IMAGE_URL,
+  getRecipes,
+  getUserProfile,
+  getLikedMeals,
+} from "../../../utils/api";
 
 const defaultMale = require("../../../assets/images/default-pp-male.jpg");
 const defaultFemale = require("../../../assets/images/default-pp-female.jpg");
@@ -32,6 +37,7 @@ export default function RecipesScreen() {
     { label: "Lunch", value: "Lunch" },
     { label: "Dinner", value: "Dinner" },
     { label: "Supper", value: "Supper" },
+    { label: "Liked Meals", value: "Liked Meals" },
   ];
 
   useEffect(() => {
@@ -45,8 +51,30 @@ export default function RecipesScreen() {
   const fetchRecipes = async () => {
     setLoading(true);
     try {
-      const data = await getRecipes(selectedCategory);
-      setMeals(data);
+      if (selectedCategory === "Liked Meals") {
+        const likedMealIds = await getLikedMeals();
+        if (likedMealIds.length === 0) {
+          setMeals([]);
+          return;
+        }
+
+        const categoriesToFetch = ["Breakfast", "Lunch", "Dinner", "Supper"];
+        let allMeals = [];
+
+        for (const category of categoriesToFetch) {
+          const mealsInCategory = await getRecipes(category);
+          allMeals = [...allMeals, ...mealsInCategory];
+        }
+
+        const likedMealsData = allMeals.filter((meal) =>
+          likedMealIds.includes(meal.id)
+        );
+
+        setMeals(likedMealsData);
+      } else {
+        const data = await getRecipes(selectedCategory);
+        setMeals(data);
+      }
     } catch (error) {
       console.error("Failed to fetch recipes:", error);
     } finally {
@@ -110,6 +138,10 @@ export default function RecipesScreen() {
         <View className="px-6 mt-16">
           {loading ? (
             <ActivityIndicator size="large" color="#A1B75A" />
+          ) : meals.length === 0 ? (
+            <Text className="text-center text-gray-500 mt-10">
+              No meals found.
+            </Text>
           ) : (
             <FlatList
               data={meals}

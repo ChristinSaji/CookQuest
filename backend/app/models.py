@@ -38,6 +38,12 @@ class UserUpdateRequest(BaseModel):
     weight: Optional[int]
     bedtime: Optional[str]
 
+class LikeMealRequest(BaseModel):
+    meal_id: str
+
+class LikedMealsResponse(BaseModel):
+    liked_meals: List[str]
+
 # -- Recipe Models --
 class RecipeBase(BaseModel):
     name: str
