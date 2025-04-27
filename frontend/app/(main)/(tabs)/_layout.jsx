@@ -19,7 +19,7 @@ export default function TabLayout() {
           right: 0,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 10,
           fontWeight: "600",
           marginBottom: 5,
         },
@@ -32,6 +32,15 @@ export default function TabLayout() {
           title: "Recipes",
           tabBarIcon: ({ color }) => (
             <Ionicons name="restaurant-outline" color={color} size={22} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="challenge"
+        options={{
+          title: "Challenge",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="flash-outline" color={color} size={22} />
           ),
         }}
       />

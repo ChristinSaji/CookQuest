@@ -186,6 +186,23 @@ export async function getRecipeById(mealId) {
   return data;
 }
 
+export async function getChallenges() {
+  const token = await getToken();
+
+  const response = await fetch(`${BASE_URL}/challenges`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok)
+    throw new Error(data.detail || "Failed to fetch challenges");
+
+  return data;
+}
+
 export async function getMealSteps(mealId) {
   const token = await getToken();
 
