@@ -1,0 +1,27 @@
+# Ignore backend folder
+/backend
+
+# Ignore all node_modules everywhere
+**/node_modules
+
+# Build artifacts
+build
+dist
+web-build
+.expo
+.expo-shared
+
+# Git stuff
+.git
+.gitignore
+
+# System trash
+.DS_Store
+Thumbs.db
+
+# Cache and logs
+*.bak
+*.tmp
+*.log
+npm-debug.log
+yarn-error.log

@@ -3,7 +3,7 @@ import "dotenv/config";
 export default {
   expo: {
     name: "CookQuest",
-    slug: "cookquest",
+    slug: "CookQuest",
     version: "1.0.0",
     orientation: "portrait",
     scheme: "cookquest",
@@ -11,8 +11,14 @@ export default {
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
+      infoPlist: {
+        NSAppTransportSecurity: {
+          NSAllowsArbitraryLoads: true,
+        },
+      },
     },
     android: {
+      package: "com.christinsaji.cookquest",
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff",
@@ -21,7 +27,6 @@ export default {
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
       ],
-      package: "com.christinsaji.cookquest",
     },
     web: {
       bundler: "metro",
@@ -45,6 +50,17 @@ export default {
           cameraPermission: "Allow CookQuest to access your camera",
           microphonePermission: "Allow CookQuest to access your microphone",
           recordAudioAndroid: true,
+        },
+      ],
+      [
+        "expo-build-properties",
+        {
+          android: {
+            usesCleartextTraffic: true,
+          },
+          ios: {
+            flipper: true,
+          },
         },
       ],
     ],
