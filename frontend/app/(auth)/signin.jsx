@@ -15,8 +15,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackgroundSvg from "../../assets/svgs/bg-signin.svg";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { loginUser } from "../../utils/api";
+import { useRouter, useFocusEffect } from "expo-router";
+import { loginUser, getToken } from "../../utils/api";
 
 export default function SignInScreen() {
   const { width, height } = Dimensions.get("window");
@@ -24,6 +24,19 @@ export default function SignInScreen() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function resetIfLoggedOut() {
+        const token = await getToken();
+        if (!token) {
+          setEmail("");
+          setPassword("");
+        }
+      }
+      resetIfLoggedOut();
+    }, [])
+  );
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -35,7 +48,7 @@ export default function SignInScreen() {
       const data = await loginUser({ email, password });
       console.log("Login success:", data);
 
-      router.push("/(main)/(tabs)/recipes");
+      router.replace("/(main)/(tabs)/recipes");
     } catch (error) {
       console.error("Login error:", error.message);
       Alert.alert("Login Failed", error.message);
@@ -80,6 +93,7 @@ export default function SignInScreen() {
                 placeholderTextColor="gray"
                 style={styles.input}
                 keyboardType="email-address"
+                autoCapitalize="none"
                 value={email}
                 onChangeText={setEmail}
               />

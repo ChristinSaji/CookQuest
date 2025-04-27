@@ -10,6 +10,7 @@ import {
   StatusBar,
   StyleSheet,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
@@ -19,6 +20,7 @@ import {
   getRecipes,
   getUserProfile,
   getLikedMeals,
+  removeToken,
 } from "../../../utils/api";
 
 const defaultMale = require("../../../assets/images/default-pp-male.jpg");
@@ -31,6 +33,8 @@ export default function RecipesScreen() {
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(false);
   const [gender, setGender] = useState("male");
+  const [userName, setUserName] = useState("");
+  const [showDrawer, setShowDrawer] = useState(false);
 
   const categories = [
     { label: "Breakfast", value: "Breakfast" },
@@ -88,8 +92,20 @@ export default function RecipesScreen() {
       if (profile?.gender) {
         setGender(profile.gender);
       }
+      if (profile?.name) {
+        setUserName(profile.name);
+      }
     } catch (error) {
       console.error("Failed to load user profile:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await removeToken();
+      router.replace("/(auth)/signin");
+    } catch (error) {
+      console.error("Failed to logout:", error);
     }
   };
 
@@ -103,7 +119,7 @@ export default function RecipesScreen() {
         resizeMode="cover"
       >
         <View className="flex-row items-center justify-between px-4 py-5">
-          <Pressable className="p-2">
+          <Pressable className="p-2" onPress={() => setShowDrawer(true)}>
             <Ionicons name="menu" size={28} color="black" />
           </Pressable>
           <Pressable onPress={() => router.push("/(onboarding)/profile")}>
@@ -113,6 +129,52 @@ export default function RecipesScreen() {
             />
           </Pressable>
         </View>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showDrawer}
+          onRequestClose={() => setShowDrawer(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.drawerContainer}>
+              <View className="items-center mt-8">
+                <Image
+                  source={gender === "female" ? defaultFemale : defaultMale}
+                  style={{ width: 80, height: 80, borderRadius: 40 }}
+                />
+                <Text className="mt-2 text-lg font-bold text-black">
+                  {userName}
+                </Text>
+              </View>
+
+              <View className="mt-10 px-8">
+                <Pressable
+                  onPress={() => {
+                    router.push("/(onboarding)/profile");
+                    setShowDrawer(false);
+                  }}
+                >
+                  <Text className="text-base text-black mb-5">My Profile</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setSelectedCategory("Liked Meals");
+                    setShowDrawer(false);
+                  }}
+                >
+                  <Text className="text-base text-black mb-5">Liked Meals</Text>
+                </Pressable>
+              </View>
+
+              <View className="flex-1 justify-end pb-10 px-8">
+                <Pressable onPress={handleLogout} style={styles.logoutButton}>
+                  <Text style={styles.logoutText}>Log Out</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         <View className="px-6 mt-8">
           <Text className="text-4xl font-bold text-black">Recipes</Text>
@@ -216,5 +278,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "flex-start",
+  },
+  drawerContainer: {
+    backgroundColor: "white",
+    width: "70%",
+    height: "100%",
+    paddingTop: 40,
+    paddingBottom: 20,
+  },
+  logoutButton: {
+    backgroundColor: "#A1B75A",
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  logoutText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
